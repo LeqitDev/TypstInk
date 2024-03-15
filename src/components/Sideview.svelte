@@ -6,16 +6,7 @@
 	import ProjectStructureView from "./ProjectStructureView.svelte";
 	import ScrollArea from "$lib/components/ui/scroll-area/scroll-area.svelte";
 
-    function getChildren() {
-        let children: App.ProjectEntry[] = [];
-        let entries = $projectStructure.files.entries();
-        for (const [hash, entry] of entries) {
-            if (entry.parent_hash === $projectStructure.root_hash) {
-                children.push(entry);
-            }
-        }
-        return children;
-    }
+    $: rootEntries = $projectStructure.files.filter((entry) => entry.parent_hash === $projectStructure.root_hash);
 </script>
 
 
@@ -26,6 +17,6 @@
 </div>
 {#if $projectStructure.files}
     <ScrollArea class="flex-1">
-        <ProjectStructureView project_tree={getChildren()} depth={0} />
+        <ProjectStructureView project_tree={rootEntries} depth={0} />
     </ScrollArea>
 {/if}

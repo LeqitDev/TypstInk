@@ -15,8 +15,9 @@
             const child_ps = res as App.ProjectStructure;
             if (child_ps.files) {
                 projectStructure.update((ps) => {
+                    const existingHashes = new Set(ps.files.map((entry) => entry.hash));
                     child_ps.files.forEach((entry) => {
-                        if (ps.files.find((e) => e.hash === entry.hash)) return;
+                        if (existingHashes.has(entry.hash)) return;
                         ps.files.push(entry);
                     });
                     return ps;
@@ -26,18 +27,11 @@
     }
 
     function getChildren(child: App.ProjectEntry) {
-        let children: App.ProjectEntry[] = [];
-        if (!$projectStructure.files) return children;
-        $projectStructure.files.forEach((entry) => {
-            if (entry.parent_hash === child.hash) {
-                children.push(entry);
-            }
-        });
-        return children;
+        return $projectStructure.files.filter((entry) => entry.parent_hash === child.hash);
     }
 </script>
 {#if project_tree }
-    {#each project_tree as child }
+    {#each project_tree.sort(sort_entrys) as child }
         {#if child}
             <div style={`padding-left: ${0.25 * depth*2}rem`}>
                 <Button 
