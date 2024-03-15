@@ -36,7 +36,7 @@
             <div style={`padding-left: ${0.25 * depth*2}rem`}>
                 <Button 
                     variant={child.is_file ? "ghost" : "link"} 
-                    size="sm" class={`w-full justify-start`} 
+                    size="sm" class="w-full justify-start h-auto py-0.5"
                     on:click={async () => {
                         if (!child.is_file) {
                             if (!child.opened) {

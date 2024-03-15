@@ -6,7 +6,9 @@
 	import * as textmate from 'vscode-textmate';
 	import type { Registry, StateStack } from 'vscode-textmate';
 	import { INITIAL } from 'vscode-textmate';
-	import { currentFile } from '$lib/stores';
+	import { closeFile, currentFile, openFile, openedFiles } from '$lib/stores';
+	import { XIcon } from 'lucide-svelte';
+	import ScrollArea from "$lib/components/ui/scroll-area/scroll-area.svelte";
 
 	let editorPane: HTMLElement;
 
@@ -148,13 +150,19 @@
             theme: 'typst-dark-theme',
             automaticLayout: true
         });
+
+		editor.onDidChangeModelContent(handleChanges);
+
+		editor.onDidChangeModel((e) => {
+			console.log("hi");
+		})
     }
 
 	onMount(() => {
         init();
 
         currentFile.subscribe((value) => {
-            if (editor && value) {
+            if (editor && value && editor.getValue() !== value.content) {
                 editor.setValue(value.content);
             }
         });
@@ -163,9 +171,51 @@
             if (editor) editor.dispose();
         };
 	});
+
+	function handleChanges(event: monaco.editor.IModelContentChangedEvent) {
+		if (!editor || !$currentFile || !editor.getModel()) return;
+		if (editor.getModel()!.getValue() !== $currentFile.content) {
+			openedFiles.update((files) => {
+				let index = files.findIndex((file) => file.hash === $currentFile!.file.hash);
+				if (index !== -1) {
+					files[index].changed = true;
+				}
+				return files;
+			});
+		} else {
+			openedFiles.update((files) => {
+				let index = files.findIndex((file) => file.hash === $currentFile!.file.hash);
+				if (index !== -1) {
+					files[index].changed = false;
+				}
+				return files;
+			});
+		}
+	}
 </script>
 
-<div class="border-b">Mein super tolles file</div>
+<ScrollArea class="border-b" orientation="horizontal">
+	<div class="flex flex-row text-nowrap h-8">
+		{#each $openedFiles as file}
+			<div class="px-1 border-r flex flex-row h-full items-center">
+				{#if file.changed}
+					<div class="w-2 h-2 bg-accent-foreground rounded-full mr-1"></div>
+				{/if}
+				<button class:underline={$currentFile?.file.hash === file.hash} on:click={() => openFile(file)}>{file.name}</button>
+				<button class="pl-0.5" on:click={() => closeFile(file)}>
+					<XIcon class="w-4 h-4" />
+				</button> 
+			</div>
+		{:else}
+			<div class="px-1 border-r flex flex-row h-full">
+				<button class="underline">undefined</button>
+				<button class="pl-0.5">
+					<XIcon class="w-4 h-4" />
+				</button> 
+			</div>
+		{/each}
+	</div>
+</ScrollArea>
 <div class="flex h-full">
 	<div class="w-full" bind:this={editorPane}></div>
 </div>

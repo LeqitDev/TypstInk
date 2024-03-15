@@ -22,6 +22,7 @@ declare global {
 			is_file: boolean;
 			parent_hash: string;
 			opened?: boolean;
+			changed?: boolean;
 		}
 	}
 }
