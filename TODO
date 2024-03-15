@@ -1,0 +1,5 @@
+Todo:
+  ☐ add a monaco model to each opened files see github https://github.com/Microsoft/monaco-editor/issues/604
+  ☐ add save file functionality
+  ☐ add the preview pane
+  ☐ add compiling to pdf
